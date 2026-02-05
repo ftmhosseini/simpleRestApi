@@ -1,6 +1,6 @@
 import express from 'express'
 import userRouter from './routes/userRoute.js'
-import ExpenseRouter from './routes/ExpenseRoute.js'
+import ExpenseRouter from './routes/expenseRoute.js'
 import incomeRouter from './routes/incomeRoute.js'
 
 const app = express()
