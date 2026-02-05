@@ -1,7 +1,7 @@
 export class Expense {
     constructor(data = {}) {
         const getValue = (category, key) => data[category]?.[key];
-        this['saving'] = Expense.removeEmpty({
+        this['savings'] = Expense.removeEmpty({
             "rrsp": getValue("savings", "rrsp"),
             "investment savings": getValue("savings", "investment savings"),
             "long-term savings": getValue("savings", "long-term savings"),

@@ -45,13 +45,24 @@ This project follows the MVC (Model-View-Controller) pattern to ensure a clean s
 5. Firebase SDK: The controller communicates with the Firebase Realtime Database using the Admin SDK.
 
 6. Response: A structured JSON response is sent back to the client.
+
+## 🔐 Environment Variables & Security
+
+To keep sensitive Firebase credentials secure, this project utilizes environment variables. Private keys are never hardcoded or committed to GitHub.
+
+For local development, create a `.env` file in the root directory. On Render, these are configured in the Environment tab of your dashboard.
+
 ## 🚀 Getting Started
 
 1. <b>Installation</b>
 
 Clone the repository and install the dependencies:
 ```bash
-npm install express firebase
+npm install
+```
+or
+```bash
+npm install express firebase dotenv
 ```
 2. <b>Configuration</b>
 
@@ -184,16 +195,16 @@ The API uses a sophisticated merging strategy for updates. When updating a user,
 merge income data:
 ```bash
  const mergedData = {
-        wages: req.body['wages']?? existingData['wages'],
-        secondaryIncome: req.body['secondary income'] ?? existingData['secondary income'],
-        interest: req.body['interest'] ?? existingData['interest'],
-        supportPayment: req.body['support payment'] ?? existingData['support payment'],
-        others: req.body['others'] ?? existingData['others']
-    };
-    Object.keys(mergedData).forEach((item)=>{
-        if(mergedData[item] === undefined)
-            delete mergedData[item]
-    })
+    wages: req.body['wages']?? existingData['wages'],
+    secondaryIncome: req.body['secondary income'] ?? existingData['secondary income'],
+    interest: req.body['interest'] ?? existingData['interest'],
+    supportPayment: req.body['support payment'] ?? existingData['support payment'],
+    others: req.body['others'] ?? existingData['others']
+};
+Object.keys(mergedData).forEach((item)=>{
+    if(mergedData[item] === undefined)
+        delete mergedData[item]
+})
 ```
 3. <b>Case-Insensitive Key Normalization</b>
 
@@ -226,7 +237,7 @@ static lowercaseKeys = (obj) => {
     }, {});
 };
 ```
-and we call this `req.body = Expence.lowercaseKeys(req.body);`
+and we call this `req.body = Expense.lowercaseKeys(req.body);`
 
 <strong>Why this matters:</strong>
 
@@ -250,5 +261,57 @@ app.use(express.urlencoded({ extended: true })); // To handle URL encoded data
 I chose to deploy the API on Render (or Vercel) because it supports Continuous Deployment (CD). Every time I push a bug fix or a new feature to my GitHub main branch, the live demo updates automatically. This ensures the recruiters and frontend team always have access to the latest, stable version of the service.
 
 Check out the live API here: [https://your-app-name.onrender.com](https://your-app-name.onrender.com)
+
+# 🚀 Deployment Steps (using Render)
+1. Prepare your code for the Web
+
+Before you deploy, make sure your code isn't "locked" to your local computer. Check two things:
+
+    The Port: In index.js (or server.js), make sure you are using an environment variable for the port. Render will assign its own port to your app.
+    JavaScript
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+    Start Script: Open package.json and ensure you have a start script:
+    JSON
+
+    "scripts": {
+      "start": "node index.js"
+    }
+
+2. Connect to Render
+
+    Go to Render.com and create a free account using your GitHub login.
+
+    Click the "New +" button and select "Web Service".
+
+    Connect your GitHub repository to Render.
+
+    Select your "Simple REST API" repository.
+
+3. Configure the Deployment
+
+Render will ask for a few details:
+
+    Runtime: Node
+
+    Build Command: npm install
+
+    Start Command: npm start (or node index.js)
+
+4. Set Environment Variables (Crucial!)
+
+Since you (hopefully) didn't push your Firebase credentials to GitHub for security, you need to tell Render what they are:
+
+    In the Render dashboard for your app, go to the "Environment" tab.
+
+    Add your keys (e.g., FIREBASE_DATABASE_URL, FIREBASE_PROJECT_ID, etc.).
+
+    Your config/firebase.js should be set up to read these via process.env.
+
+5. Deploy
+
+Click "Create Web Service". Render will pull your code from GitHub, install the dependencies, and give you a URL like https://simple-rest-api-xyz.onrender.com.
 
 

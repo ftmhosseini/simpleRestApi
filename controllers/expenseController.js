@@ -33,13 +33,14 @@ export const putExpense = async (req, res) => {
         const existingData = snapshot.val();
         // req.body = JSON.parse(JSON.stringify(req.body).toLowerCase());
         req.body = Expense.lowercaseKeys(req.body);
+        
         const mergedData = {
-            'saving': Expense.removeEmpty({
-                "rrsp": req.body['saving']?.["rrsp"] ?? existingData['saving']?.["rrsp"],
-                "investment savings": req.body['saving']?.["investment savings"] ?? existingData['saving']?.["investment savings"],
-                "long-term savings": req.body['saving']?.["long-term savings"] ?? existingData['saving']?.["long-term savings"],
-                "bonds": req.body['saving']?.["bonds"] ?? existingData['saving']?.["bonds"],
-                "others": req.body['saving']?.["others"] ?? existingData['saving']?.["others"],
+            'savings': Expense.removeEmpty({
+                "rrsp": req.body['savings']?.["rrsp"] ?? existingData['savings']?.["rrsp"],
+                "investment savings": req.body['savings']?.["investment savings"] ?? existingData['savings']?.["investment savings"],
+                "long-term savings": req.body['savings']?.["long-term savings"] ?? existingData['savings']?.["long-term savings"],
+                "bonds": req.body['savings']?.["bonds"] || existingData['savings']?.["bonds"],
+                "others": req.body['savings']?.["others"] ?? existingData['savings']?.["others"],
             }),
 
             'payment obligations': Expense.removeEmpty({
@@ -83,7 +84,8 @@ export const putExpense = async (req, res) => {
                 "others": req.body['personal']?.["others"] ?? existingData['personal']?.["others"]
             })
         };
-
+        console.log(mergedData);
+        
         // Final cleanup: removes top-level keys if they are undefined/empty
         Object.keys(mergedData).forEach(key => {
             if (mergedData[key] === undefined || mergedData[key] === null) {
