@@ -3,22 +3,37 @@ import { ref, get, update, set, remove, runTransaction } from 'firebase/database
 import { Expense } from '../models/Expense.js'
 const node = '/expenses/'
 export const getExpenses = async (req, res) => {
-    const snapshot = await get(ref(db, node))
-    if (snapshot.exists())
-        res.status(200).send(snapshot)
-    else
-        res.status(404).send('Not found a Expense with this id')
-
-    res.send('welcome to this page')
-
-
+    try {
+        const snapshot = await get(ref(db, node));
+        
+        if (snapshot.exists()) {
+            // Return the actual data inside the snapshot
+            res.status(200).json(snapshot.val()); 
+        } else {
+            // It's technically successful (the DB was reached), 
+            // but the collection is empty.
+            res.status(200).json([]); 
+        }
+    } catch (error) {
+        // This catches "Database Errors" (Requirement 3a)
+        console.error("Error fetching expenses:", error);
+        res.status(500).json({ 
+            error: "Internal Server Error", 
+            message: "Could not retrieve expenses from the database." 
+        });
+    }
 }
 export const getExpense = async (req, res) => {
-    const snapshot = await get(ref(db, node + req.params.id))
-    if (snapshot.exists())
-        res.status(200).send(snapshot)
-    else
-        res.status(404).send('Not found a Expense with this id')
+    try {
+        const snapshot = await get(ref(db, node + req.params.id));
+        if (snapshot.exists()) {
+            res.status(200).json(snapshot.val()); 
+        } else {
+            res.status(404).json({ error: "Not Found", message: "Expense not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "Server Error", message: error.message });
+    }
 }
 export const putExpense = async (req, res) => {
     try {
@@ -27,7 +42,7 @@ export const putExpense = async (req, res) => {
         if (!snapshot.exists()) {
             res.status(404).json({
                 error: "Not Found",
-                message: `Excepence with ID ${req.params.id} does not exist.`
+                message: `Excepense with ID ${req.params.id} does not exist.`
             });
         }
         const existingData = snapshot.val();
