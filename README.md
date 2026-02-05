@@ -258,60 +258,47 @@ app.use(express.urlencoded({ extended: true })); // To handle URL encoded data
 
 ## 🔗 Live Demo
 
-I chose to deploy the API on Render (or Vercel) because it supports Continuous Deployment (CD). Every time I push a bug fix or a new feature to my GitHub main branch, the live demo updates automatically. This ensures the recruiters and frontend team always have access to the latest, stable version of the service.
+The API is deployed on Render to take advantage of Continuous Deployment (CD). By linking the GitHub repository to Render, any changes pushed to the main branch—whether bug fixes or new features—are automatically built and deployed. This ensures that recruiters and frontend collaborators always have access to the most up-to-date and stable version of the service.
 
-Check out the live API here: [https://your-app-name.onrender.com](https://your-app-name.onrender.com)
+Check out the live API here: [https://simplerestapi-gjve.onrender.com/](https://simplerestapi-gjve.onrender.com/)
 
-# 🚀 Deployment Steps (using Render)
-1. Prepare your code for the Web
+## 🚀 Deployment Process
 
-Before you deploy, make sure your code isn't "locked" to your local computer. Check two things:
+To maintain a public GitHub repository while protecting sensitive data, this project uses a strict environment variable strategy. No Firebase credentials or private keys are stored in the source code.
 
-    The Port: In index.js (or server.js), make sure you are using an environment variable for the port. Render will assign its own port to your app.
-    JavaScript
+1. ***Web-Ready Configuration***
 
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+Before deploying, the application was configured to be environment-aware:
 
-    Start Script: Open package.json and ensure you have a start script:
-    JSON
+- **Dynamic Port Binding:** The server uses `process.env.PORT` to allow the hosting platform to assign a port dynamically.
+```bash
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+- **Standardized Start Script:** The `package.json` includes a start script for the production environment.
+```json
+"scripts": {
+  "start": "node index.js"
+}
+```
+2. ***Security & Environment Variables (Critical)***
 
-    "scripts": {
-      "start": "node index.js"
-    }
+Since the `.env` file is ignored by Git (via `.gitignore`), credentials must be manually mirrored on the hosting platform.
 
-2. Connect to Render
+- **Local Development:** Uses a local `.env` file.
 
-    Go to Render.com and create a free account using your GitHub login.
+- **Production:** Credentials are added to the Environment tab in the Render Dashboard. This allows the API to remain public on GitHub while keeping the database connection private and secure.
 
-    Click the "New +" button and select "Web Service".
+3. ***Continuous Deployment Steps***
 
-    Connect your GitHub repository to Render.
+    1. **Connect:** Link the GitHub repository to a new Render Web Service.
 
-    Select your "Simple REST API" repository.
+    2. **Build Settings:** * Runtime: `Node`
 
-3. Configure the Deployment
+        - **Build Command:** `npm install`
 
-Render will ask for a few details:
+        - **Start Command:** `npm start`
 
-    Runtime: Node
+    3. **Variables:** Inject all required keys (API Keys, Database URL, etc.) into the Render Environment settings.
 
-    Build Command: npm install
-
-    Start Command: npm start (or node index.js)
-
-4. Set Environment Variables (Crucial!)
-
-Since you (hopefully) didn't push your Firebase credentials to GitHub for security, you need to tell Render what they are:
-
-    In the Render dashboard for your app, go to the "Environment" tab.
-
-    Add your keys (e.g., FIREBASE_DATABASE_URL, FIREBASE_PROJECT_ID, etc.).
-
-    Your config/firebase.js should be set up to read these via process.env.
-
-5. Deploy
-
-Click "Create Web Service". Render will pull your code from GitHub, install the dependencies, and give you a URL like https://simple-rest-api-xyz.onrender.com.
-
-
+    4. **Live:** Render pulls the code, installs dependencies, and serves the API at the live URL.
