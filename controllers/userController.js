@@ -75,6 +75,12 @@ export const putUser = async (req, res) => {
 }
 export const postUser = async (req, res) => {
     try {
+        const newId = result.snapshot.val();
+        req.body = Expense.lowercaseKeys(req.body);
+
+        const newUser = new User(req.body.name, req.body.username, req.body.email, req.body.address);
+        User.validate(req.body)
+
         const counterRef = ref(db, 'lastUserId');
         const result = await runTransaction(counterRef, (currentValue) => {
             if (currentValue === null) {
@@ -82,12 +88,6 @@ export const postUser = async (req, res) => {
             }
             return currentValue + 1;
         });
-
-        const newId = result.snapshot.val();
-        req.body = Expense.lowercaseKeys(req.body);
-
-        const newUser = new User(req.body.name, req.body.username, req.body.email, req.body.address);
-        User.validate(req.body)
         await set(ref(db, node + newId), { ...newUser })
         res.status(201).send({ id: newId, message: "User created" });
     } catch (error) {

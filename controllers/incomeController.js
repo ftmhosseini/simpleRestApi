@@ -6,21 +6,21 @@ const node = '/income/'
 export const getAllIncome = async (req, res) => {
     try {
         const snapshot = await get(ref(db, node));
-        
+
         if (snapshot.exists()) {
             // Return the actual data inside the snapshot
-            res.status(200).json(snapshot.val()); 
+            res.status(200).json(snapshot.val());
         } else {
             // It's technically successful (the DB was reached), 
             // but the collection is empty.
-            res.status(200).json([]); 
+            res.status(200).json([]);
         }
     } catch (error) {
         // This catches "Database Errors" (Requirement 3a)
         console.error("Error fetching expenses:", error);
-        res.status(500).json({ 
-            error: "Internal Server Error", 
-            message: "Could not retrieve expenses from the database." 
+        res.status(500).json({
+            error: "Internal Server Error",
+            message: "Could not retrieve expenses from the database."
         });
     }
 }
@@ -71,6 +71,12 @@ export const putIncome = async (req, res) => {
 }
 export const postIncome = async (req, res) => {
     try {
+        const newId = result.snapshot.val();
+        req.body = Expense.lowercaseKeys(req.body);
+
+        const newIncome = new Income(req.body);
+        Income.validate(req.body)
+
         const counterRef = ref(db, 'lastIncomeId');
         const result = await runTransaction(counterRef, (currentValue) => {
             if (currentValue === null) {
@@ -78,12 +84,6 @@ export const postIncome = async (req, res) => {
             }
             return currentValue + 1;
         });
-
-        const newId = result.snapshot.val();
-        req.body = Expense.lowercaseKeys(req.body);
-
-        const newIncome = new Income(req.body);
-        Income.validate(req.body)
         await set(ref(db, node + newId), { ...newIncome })
         res.status(201).send({ id: newId, message: "Income created" });
     } catch (error) {

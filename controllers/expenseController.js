@@ -5,21 +5,21 @@ const node = '/expenses/'
 export const getExpenses = async (req, res) => {
     try {
         const snapshot = await get(ref(db, node));
-        
+
         if (snapshot.exists()) {
             // Return the actual data inside the snapshot
-            res.status(200).json(snapshot.val()); 
+            res.status(200).json(snapshot.val());
         } else {
             // It's technically successful (the DB was reached), 
             // but the collection is empty.
-            res.status(200).json([]); 
+            res.status(200).json([]);
         }
     } catch (error) {
         // This catches "Database Errors" (Requirement 3a)
         console.error("Error fetching expenses:", error);
-        res.status(500).json({ 
-            error: "Internal Server Error", 
-            message: "Could not retrieve expenses from the database." 
+        res.status(500).json({
+            error: "Internal Server Error",
+            message: "Could not retrieve expenses from the database."
         });
     }
 }
@@ -27,7 +27,7 @@ export const getExpense = async (req, res) => {
     try {
         const snapshot = await get(ref(db, node + req.params.id));
         if (snapshot.exists()) {
-            res.status(200).json(snapshot.val()); 
+            res.status(200).json(snapshot.val());
         } else {
             res.status(404).json({ error: "Not Found", message: "Expense not found" });
         }
@@ -37,6 +37,7 @@ export const getExpense = async (req, res) => {
 }
 export const putExpense = async (req, res) => {
     try {
+        // Fetch data from database if available
         const ExpenseRef = ref(db, node + req.params.id)
         const snapshot = await get(ExpenseRef)
         if (!snapshot.exists()) {
@@ -46,9 +47,10 @@ export const putExpense = async (req, res) => {
             });
         }
         const existingData = snapshot.val();
+        // Normalize keys
         // req.body = JSON.parse(JSON.stringify(req.body).toLowerCase());
         req.body = Expense.lowercaseKeys(req.body);
-        
+        // Only update if the new value isn't null, undefined, or an empty string
         const mergedData = {
             'savings': Expense.removeEmpty({
                 "rrsp": req.body['savings']?.["rrsp"] ?? existingData['savings']?.["rrsp"],
@@ -100,7 +102,7 @@ export const putExpense = async (req, res) => {
             })
         };
         console.log(mergedData);
-        
+
         // Final cleanup: removes top-level keys if they are undefined/empty
         Object.keys(mergedData).forEach(key => {
             if (mergedData[key] === undefined || mergedData[key] === null) {
@@ -117,22 +119,27 @@ export const putExpense = async (req, res) => {
 }
 export const postExpense = async (req, res) => {
     try {
-        const counterRef = ref(db, 'lastExpenseId');
-        const result = await runTransaction(counterRef, (currentValue) => {
-            if (currentValue === null) {
-                return 100;
-            }
-            return currentValue + 1;
-        });
-
-        const newId = result.snapshot.val();
+        // 1. Normalize keys
         req.body = Expense.lowercaseKeys(req.body);
-
-        
         const newExpense = new Expense(req.body);
+        // 2. Check if the object actually has data
+        if (Object.keys(newExpense).length > 0) {
+            const counterRef = ref(db, 'lastExpenseId');
+            // 3. Atomically increment the ID
+            const result = await runTransaction(counterRef, (currentValue) => {
+                if (currentValue === null) {
+                    return 100;
+                }
+                return currentValue + 1;
+            });
 
-        await set(ref(db, node + newId), { ...newExpense })
-        res.status(201).send({ id: newId, message: "Expense created" });
+            const newId = result.snapshot.val();
+            // 4. Save the expense using the new ID
+            await set(ref(db, node + newId), { ...newExpense })
+            res.status(201).send({ id: newId, message: "Expense created" });
+        } else {
+            res.status(400).send("Invalid input: Expense object is empty.");
+        }
     } catch (error) {
         res.status(500).send(`${error.message}`);
     }

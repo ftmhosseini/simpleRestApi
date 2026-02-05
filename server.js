@@ -28,8 +28,9 @@ app.get('/', (req, res) => {
             income: "GET, POST, DELETE, PUT on /api/income",
             expenses: "GET, POST, DELETE, PUT on /api/expenses"
         },
-        author: "Fatemeh",
-        repository: "https://github.com/ftmhosseini/simpleRestApi"
+        author: "Fatemeh Hosseini",
+        repository: "https://github.com/ftmhosseini/simpleRestApi",
+        deployed: "https://simplerestapi-gjve.onrender.com/"
     });
 });
 
