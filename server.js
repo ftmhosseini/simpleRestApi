@@ -1,17 +1,31 @@
 import express from 'express'
 import userRouter from './routes/userRoute.js'
-import ExpenseRouter from './routes/expenseRoute.js'
+import expenseRouter from './routes/expenseRoute.js'
 import incomeRouter from './routes/incomeRoute.js'
 
 const app = express()
+
+// --- Middleware ---
+// Parse incoming JSON payloads
 app.use(express.json())
+// Parse URL-encoded data (extended: true is the standard default for rich objects)
 app.use(express.urlencoded())
+
+// --- System Routes ---
+// Health check for browsers to prevent 404 logs in the console
 app.get('/favicon.ico', (req,res)=>{
     res.status(200);
 })
+
+// --- API Resource Routes ---
 app.use('/api/users', userRouter)
-app.use('/api/Expenses', ExpenseRouter)
+app.use('/api/expenses', expenseRouter)
 app.use('/api/income', incomeRouter)
+/**
+ * @route   GET /
+ * @desc    API Root: Returns metadata, available endpoints, and project info
+ * @access  Public
+ */
 app.get('/', (req, res) => {
     res.status(200).json({
         message: "Welcome to the Simple REST API 🚀",
@@ -34,5 +48,7 @@ app.get('/', (req, res) => {
     });
 });
 
+// --- Server Initialization ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const HOST = process.env.HOST || 'localhost';
+app.listen(PORT, HOST, () => console.log(`Server running on port ${PORT} on host ${HOST}`));

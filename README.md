@@ -106,14 +106,14 @@ Manages sources of revenue and savings.
 <b>User Data Format:</b>
 ```json
 {
-  "name": "Fatemeh",
-  "username": "Fati",
-  "email": "sali@gmail.com",
+  "name": "Femi Ola",
+  "username": "Femi",
+  "email": "oluwafemi@sozentech.com",
   "address": {
-    "street": "Oakfield Dr",
-    "suite": "10511",
+    "street": "Panatella Dr",
+    "suite": "Apt. 556",
     "city": "Calgary",
-    "zipcode": "T2W 2G5"
+    "zipcode": "T3I 3W2"
   }
 }
 ```

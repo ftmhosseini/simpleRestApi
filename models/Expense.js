@@ -1,6 +1,17 @@
+/**
+ * Represents a comprehensive Expense model.
+ * Organizes financial outgoings into categorized groups (Housing, Savings, Personal, etc.)
+ * and automatically prunes empty values to maintain data integrity.
+ */
 export class Expense {
+    /**
+     * @param {Object} data - The nested input object (usually from req.body)
+     */
     constructor(data = {}) {
+        // Helper to safely navigate nested data without crashing (using Optional Chaining)
         const getValue = (category, key) => data[category]?.[key];
+
+        // Categorized Mapping: Each section is cleaned via removeEmpty()
         this['savings'] = Expense.removeEmpty({
             "rrsp": getValue("savings", "rrsp"),
             "investment savings": getValue("savings", "investment savings"),
@@ -44,12 +55,20 @@ export class Expense {
             "hobbies": getValue("personal", "hobbies"),
             "others": getValue("personal", "others")
         });
+
+        // Final cleanup: Remove top-level categories if they ended up empty/undefined
         Object.keys(this).forEach((item) => {
             if (this[item] === undefined || this[item] === null) {
                 delete this[item];
             }
         })
     }
+
+    /**
+     * Filters out null, undefined, or empty strings from an object.
+     * @param {Object} obj - The category object to clean
+     * @returns {Object|undefined} - Returns the cleaned object, or undefined if empty
+     */
     static removeEmpty(obj) {
         const cleanObj = {};
         Object.keys(obj).forEach((key) => {
@@ -60,6 +79,12 @@ export class Expense {
         });
         return Object.keys(cleanObj).length > 0 ? cleanObj : undefined;
     }
+
+    /**
+     * Recursively converts all object keys to lowercase.
+     * Useful for standardizing input regardless of how the user typed the keys.
+     * @param {Object|Array} obj - The data structure to transform
+     */
     static lowercaseKeys = (obj) => {
         if (typeof obj !== 'object' || obj === null) return obj;
 
