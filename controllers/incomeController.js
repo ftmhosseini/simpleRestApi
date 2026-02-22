@@ -27,10 +27,10 @@ export const getAllIncome = async (req, res) => {
         }
     } catch (error) {
         // This catches "Database Errors" (Requirement 3a)
-        console.error("Error fetching expenses:", error);
+        console.error("Error fetching Income:", error);
         res.status(500).json({
             error: "Internal Server Error",
-            message: "Could not retrieve expenses from the database."
+            message: "Could not retrieve Income from the database."
         });
     }
 }
@@ -45,7 +45,7 @@ export const getIncome = async (req, res) => {
         if (snapshot.exists()) {
             res.status(200).json(snapshot.val()); // Use .json() for consistency
         } else {
-            res.status(404).json({ error: "Not Found", message: "Expense not found" });
+            res.status(404).json({ error: "Not Found", message: "Income not found" });
         }
     } catch (error) {
         res.status(500).json({ error: "Server Error", message: error.message });
